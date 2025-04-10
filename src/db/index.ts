@@ -10,10 +10,13 @@ class SequelizeInstance {
     password: process.env.DB_PASSWORD,
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
   };
+  private readonly _url: string = process.env.DB_URL || '';
   private readonly _sequelize: Sequelize;
 
   constructor() {
-    this._sequelize = new Sequelize(this._sequelizeOptions);
+    this._sequelize = process.env.USE_DB_URL === 'true'
+      ? new Sequelize(this._url)
+      : new Sequelize(this._sequelizeOptions);
   }
 
   public get sequelize(): Sequelize {
