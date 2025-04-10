@@ -1,0 +1,45 @@
+{
+  "name": "rentalhub-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "engines": {
+    "node": ">=22.x"
+  },
+  "scripts": {
+    "build": "tsc",
+    "startTS": "ts-node src",
+    "start": "node build/index.js",
+    "eslint": "npx eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/torkhau/RentalHub-API.git"
+  },
+  "author": "Aliaksandr Torkhau",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/torkhau/RentalHub-API/issues"
+  },
+  "homepage": "https://github.com/torkhau/RentalHub-API#readme",
+  "description": "",
+  "devDependencies": {
+    "@stylistic/eslint-plugin-ts": "^4.2.0",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.0",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.24.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.29.1"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "pg": "^8.14.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7"
+  }
+}
