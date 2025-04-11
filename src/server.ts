@@ -4,7 +4,7 @@ import 'dotenv/config';
 import express from 'express';
 import { ErrorApi } from './apis/error';
 import { sequelizeInstance } from './db';
-import { UsersModel } from './db/models';
+import { AuthRouter } from './routes';
 
 export class Server {
   private readonly port = parseInt(process.env.PORT || '3000', 10);
@@ -24,6 +24,9 @@ export class Server {
     this._express.get('/', (_req, res) => {
       res.send('There is API for RentalHub project.');
     });
+    this._express.use('/auth', new AuthRouter().router);
+    const routers = express.Router();
+    this._express.use('/api', routers);
   }
 
   private registerErrorHandler(): void {
