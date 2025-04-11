@@ -4,6 +4,7 @@ import 'dotenv/config';
 import express from 'express';
 import { ErrorApi } from './apis/error';
 import { sequelizeInstance } from './db';
+import { UsersModel } from './db/models';
 
 export class Server {
   private readonly port = parseInt(process.env.PORT || '3000', 10);
