@@ -10,7 +10,7 @@ export abstract class BaseModel<M extends Model, Omits extends keyof M | never =
   declare updatedAt: CreationOptional<Date>;
 
   static readonly BASE_ATTRIBUTES = {
-    id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
   };

@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response, Router } from 'express';
+import { RequestHandler, Router } from 'express';
 
 export interface Endpoint {
   path: string;
   method: 'get' | 'post' | 'put' | 'patch' | 'delete';
-  handler: (req: Request, res: Response, next: NextFunction) => void;
+  handler: RequestHandler;
 }
 
 export abstract class BaseRoutes {
