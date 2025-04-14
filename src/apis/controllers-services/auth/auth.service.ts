@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { sequelizeInstance } from '../../../db';
 import { UsersModel } from '../../../db/models';
 import { ErrorApi } from '../../error';
+import { JWTService } from '../../services';
 import { BaseService } from '../abstract';
 import { AuthData } from './types';
 
@@ -34,16 +35,21 @@ export class AuthService extends BaseService {
     }
   }
 
-  public async login({ email, password }: AuthData): Promise<UsersModel> {
+  public async login({
+    email,
+    password,
+  }: AuthData): Promise<{ user: UsersModel; tokens: { accessToken: string; refreshToken: string } }> {
     try {
       const user = await UsersModel.findOne({ where: { email } });
 
       if (!user) throw new ErrorApi(404, `Email '${email}' not found. Verify and try again.`);
 
-      if (compareSync(password, user.password))
+      if (!compareSync(password, user.password))
         throw new ErrorApi(401, 'E-mail or password is wrong. Verify and try again.');
 
-      return user;
+      const tokens = JWTService.generateTokens(user);
+
+      return { user, tokens };
     } catch (error) {
       this.handleErrors(error);
     }
