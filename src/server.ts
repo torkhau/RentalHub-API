@@ -59,15 +59,17 @@ export class Server {
     this.registerMiddlewares();
     this.registerRoutes();
     this.registerErrorHandler();
+
     try {
       await this.connectToDatabase();
     } catch (error) {
-      if  (error instanceof ErrorApi) {
+      if (error instanceof ErrorApi) {
         console.error('Database connection error:', error.message);
       } else {
         console.error('Unexpected error:', error);
       }
     }
+
     this._express.listen(this.port, () => console.log(`Server is running on port ${this.port}`));
   }
 }

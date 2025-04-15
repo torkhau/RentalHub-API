@@ -3,16 +3,19 @@ import { UsersModel } from '../../db/models';
 import { ErrorApi } from '../error';
 
 type TokenType = 'access' | 'refresh';
-type TokenResponse = { accessToken: string; refreshToken: string } | { accessToken: string } | { refreshToken: string };
+type AccessToken = { accessToken: string };
+type RefreshToken = { refreshToken: string };
+export type AccessAndRefreshToken = { accessToken: string; refreshToken: string };
+type TokenResponse = AccessToken | RefreshToken | AccessAndRefreshToken;
 
 export class JWTService {
-  private static readonly accessTokenExpirationTime = '1d';
-  private static readonly refreshTokenExpirationTime = '3d';
+  public static readonly ACCESS_TOKEN_EXPIRATION_TIME = 1 * 24 * 60 * 60; // 1 day in seconds
+  public static readonly REFRESH_TOKEN_EXPIRATION_TIME = 3 * 24 * 60 * 60; // 3 days in seconds
 
   private static get accessSecret(): string {
     const secret = process.env.JWT_ACCESS_SECRET;
 
-    if (!secret) throw new ErrorApi(500, 'Access secret not found');
+    if (!secret) throw new ErrorApi(500, 'Access secret not found.');
 
     return secret;
   }
@@ -20,7 +23,7 @@ export class JWTService {
   private static get refreshSecret(): string {
     const secret = process.env.JWT_REFRESH_SECRET;
 
-    if (!secret) throw new ErrorApi(500, 'Refresh secret not found');
+    if (!secret) throw new ErrorApi(500, 'Refresh secret not found.');
 
     return secret;
   }
@@ -33,26 +36,26 @@ export class JWTService {
     }
   }
   
-  public static generateTokens(user: UsersModel): { accessToken: string; refreshToken: string };
-  public static generateTokens(user: UsersModel, type: 'access'): { accessToken: string };
-  public static generateTokens(user: UsersModel, type: 'refresh'): { refreshToken: string };
+  public static generateTokens(user: UsersModel): AccessAndRefreshToken;
+  public static generateTokens(user: UsersModel, type: 'access'): AccessToken;
+  public static generateTokens(user: UsersModel, type: 'refresh'): RefreshToken;
   public static generateTokens(user: UsersModel, type?: TokenType): TokenResponse {
     const payload = { id: user.id, email: user.email };
 
     try {
       switch (type) {
         case 'access':
-          return { accessToken: this.signToken(payload, this.accessSecret, this.accessTokenExpirationTime) };
+          return { accessToken: this.signToken(payload, this.accessSecret, this.ACCESS_TOKEN_EXPIRATION_TIME) };
         case 'refresh':
-          return { refreshToken: this.signToken(payload, this.refreshSecret, this.refreshTokenExpirationTime) };
+          return { refreshToken: this.signToken(payload, this.refreshSecret, this.REFRESH_TOKEN_EXPIRATION_TIME) };
         default:
           return {
-            accessToken: this.signToken(payload, this.accessSecret, this.accessTokenExpirationTime),
-            refreshToken: this.signToken(payload, this.refreshSecret, this.refreshTokenExpirationTime),
+            accessToken: this.signToken(payload, this.accessSecret, this.ACCESS_TOKEN_EXPIRATION_TIME),
+            refreshToken: this.signToken(payload, this.refreshSecret, this.REFRESH_TOKEN_EXPIRATION_TIME),
           };
       }
     } catch {
-      throw new ErrorApi(500, 'Error generating tokens');
+      throw new ErrorApi(500, 'Error generating tokens.');
     }
   }
 }

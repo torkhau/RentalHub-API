@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 import { sequelizeInstance } from '../../../db';
 import { UsersModel } from '../../../db/models';
 import { ErrorApi } from '../../error';
-import { JWTService } from '../../services';
+import { AccessAndRefreshToken, JWTService } from '../../services';
 import { BaseService } from '../abstract';
 import { AuthData } from './types';
 
@@ -38,7 +38,7 @@ export class AuthService extends BaseService {
   public async login({
     email,
     password,
-  }: AuthData): Promise<{ user: UsersModel; tokens: { accessToken: string; refreshToken: string } }> {
+  }: AuthData): Promise<{ user: UsersModel; tokens: AccessAndRefreshToken }> {
     try {
       const user = await UsersModel.findOne({ where: { email } });
 

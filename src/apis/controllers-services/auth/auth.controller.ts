@@ -1,20 +1,38 @@
-import { NextFunction, Request, Response } from 'express';
+import { CookieOptions, NextFunction, Request, Response } from 'express';
 import isEmail from 'validator/lib/isEmail';
 import { Endpoint } from '../../../routes/abstract';
 import { ErrorApi } from '../../error';
+import { JWTService } from '../../services';
 import { AuthService } from './auth.service';
 import { AuthData } from './types';
 
 export class AuthController {
-  private readonly service: AuthService;
+  private readonly service: AuthService = new AuthService();
+  public readonly endpoints: Endpoint[] = [
+    {
+      path: '/login',
+      method: 'post',
+      handler: (req, res, next) => this.login(req, res, next),
+    },
+    {
+      path: '/register',
+      method: 'post',
+      handler: (req, res, next) => this.register(req, res, next),
+    },
+  ];
 
-  constructor() {
-    this.service = new AuthService();
+  private generateCookieOptions(maxAge: number): CookieOptions {
+    return {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: maxAge * 1000,
+    };
   }
 
   private validateAuthData(email?: string, password?: string): AuthData {
-    email = email?.trim();
-    password = password?.toLowerCase().trim();
+    email = email?.toLowerCase().trim();
+    password = password?.trim();
 
     if (!email || !password) throw new ErrorApi(422, 'Username and password are required.');
 
@@ -23,11 +41,23 @@ export class AuthController {
     return { email, password };
   }
 
-  protected login({ body: { email, password } }: Request, res: Response, next: NextFunction): void {
+  protected async login({ body: { email, password } }: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const authData = this.validateAuthData(email, password);
+      const { user, tokens } = await this.service.login(authData);
+      res
+        .cookie(
+          'refreshToken',
+          tokens.refreshToken,
+          this.generateCookieOptions(JWTService.REFRESH_TOKEN_EXPIRATION_TIME)
+        )
+        .cookie('accessToken', tokens.accessToken, this.generateCookieOptions(JWTService.ACCESS_TOKEN_EXPIRATION_TIME))
+        .status(200)
+        .json({
+          payload: { user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } },
+        });
     } catch (error) {
-      next(error);
+      next(error as ErrorApi);
     }
   }
 
@@ -38,22 +68,7 @@ export class AuthController {
       await this.service.register(authData);
       res.status(201).send({ message: 'User registered successfully.' });
     } catch (error) {
-      next(error);
+      next(error as ErrorApi);
     }
-  }
-
-  public get routes(): Endpoint[] {
-    return [
-      {
-        path: '/login',
-        method: 'post',
-        handler: (req, res, next) => this.login(req, res, next),
-      },
-      {
-        path: '/register',
-        method: 'post',
-        handler: (req, res, next) => this.register(req, res, next),
-      },
-    ];
   }
 }
