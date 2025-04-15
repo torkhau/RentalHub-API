@@ -5,6 +5,7 @@ import { ErrorApi } from '../../error';
 import { JWTService } from '../../services';
 import { AuthService } from './auth.service';
 import { AuthData } from './types';
+import { UserController } from '../user';
 
 export class AuthController {
   private readonly service: AuthService = new AuthService();
@@ -45,6 +46,7 @@ export class AuthController {
     try {
       const authData = this.validateAuthData(email, password);
       const { user, tokens } = await this.service.login(authData);
+      const userName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email;
       res
         .cookie(
           'refreshToken',
@@ -54,7 +56,8 @@ export class AuthController {
         .cookie('accessToken', tokens.accessToken, this.generateCookieOptions(JWTService.ACCESS_TOKEN_EXPIRATION_TIME))
         .status(200)
         .json({
-          payload: { user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } },
+          payload: { user: UserController.toDTO(user) },
+          message: `Hello, ${userName}.`,
         });
     } catch (error) {
       next(error as ErrorApi);
