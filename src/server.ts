@@ -3,8 +3,8 @@ import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 import { ErrorApi } from './apis/error';
+import { ResponseApi } from './apis/response';
 import { sequelizeInstance } from './db';
-import { UsersModel } from './db/models';
 
 export class Server {
   private readonly port = parseInt(process.env.PORT || '3000', 10);
@@ -27,17 +27,16 @@ export class Server {
   }
 
   private registerErrorHandler(): void {
-    this._express.use((error: ErrorApi, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      const status = error.status || 500;
-      res.status(status).send({
-        payload: null,
-        message: {
-          ...error,
-          message: error.message,
-          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-        },
-      });
-    });
+    this._express.use(
+      (error: ErrorApi, _req: express.Request, res: express.Response<ResponseApi>, _next: express.NextFunction) => {
+        const status = error.status || 500;
+        const message = error.customMessage;
+
+        if (typeof message !== 'string' && process.env.NODE_ENV === 'development') message.stack = error.stack;
+        
+        res.status(status).json({ payload: null, message });
+      }
+    );
   }
 
   private async connectToDatabase(): Promise<void> {
@@ -59,7 +58,7 @@ export class Server {
     try {
       await this.connectToDatabase();
     } catch (error) {
-      if  (error instanceof ErrorApi) {
+      if (error instanceof ErrorApi) {
         console.error('Database connection error:', error.message);
       } else {
         console.error('Unexpected error:', error);
