@@ -11,10 +11,11 @@ interface UserDTO {
 }
 
 export class UserController extends BaseCRUDController<UsersModel, UserService, UserDTO> {
+  protected routePrefix = '/users';
   protected service = new UserService();
 
-  constructor() {
-    super(UserController);
+  protected toDTO(model: UsersModel): UserDTO {
+    return UserController.toDTO(model);
   }
 
   public static toDTO(model: UsersModel): UserDTO {
@@ -26,5 +27,4 @@ export class UserController extends BaseCRUDController<UsersModel, UserService, 
       email: model.email,
     };
   }
-
 }
