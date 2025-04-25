@@ -4,10 +4,10 @@ import { sequelizeInstance } from '../../../db';
 import { UsersModel } from '../../../db/models';
 import { ErrorApi } from '../../error';
 import { AccessAndRefreshToken, JWTService } from '../../services';
-import { BaseService } from '../abstract';
+import { Base } from '../abstract';
 import { AuthData } from './types';
 
-export class AuthService extends BaseService {
+export class AuthService extends Base {
   private async sendEmail({ email, password }: AuthData): Promise<void> {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
@@ -35,10 +35,7 @@ export class AuthService extends BaseService {
     }
   }
 
-  public async login({
-    email,
-    password,
-  }: AuthData): Promise<{ user: UsersModel; tokens: AccessAndRefreshToken }> {
+  public async login({ email, password }: AuthData): Promise<{ user: UsersModel; tokens: AccessAndRefreshToken }> {
     try {
       const user = await UsersModel.findOne({ where: { email } });
 
