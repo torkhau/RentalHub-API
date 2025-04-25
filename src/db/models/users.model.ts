@@ -4,9 +4,9 @@ import { BaseModel } from './abstract';
 class Users extends BaseModel<Users> {
   declare email: string;
   declare password: string;
-  declare firstName: string;
-  declare lastName: string;
-  declare phone: string;
+  declare firstName?: string;
+  declare lastName?: string;
+  declare phone?: string;
 }
 
 Users.init(

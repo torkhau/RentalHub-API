@@ -5,6 +5,7 @@ import express from 'express';
 import { ErrorApi } from './apis/error';
 import { ResponseApi } from './apis/response';
 import { sequelizeInstance } from './db';
+import { AuthRouter } from './routes';
 
 export class Server {
   private readonly port = parseInt(process.env.PORT || '3000', 10);
@@ -24,6 +25,9 @@ export class Server {
     this._express.get('/', (_req, res) => {
       res.send('There is API for RentalHub project.');
     });
+    this._express.use('/auth', new AuthRouter().router);
+    const routers = express.Router();
+    this._express.use('/api', routers);
   }
 
   private registerErrorHandler(): void {
@@ -33,7 +37,7 @@ export class Server {
         const message = error.customMessage;
 
         if (typeof message !== 'string' && process.env.NODE_ENV === 'development') message.stack = error.stack;
-        
+
         res.status(status).json({ payload: null, message });
       }
     );
@@ -55,6 +59,7 @@ export class Server {
     this.registerMiddlewares();
     this.registerRoutes();
     this.registerErrorHandler();
+
     try {
       await this.connectToDatabase();
     } catch (error) {
@@ -64,6 +69,7 @@ export class Server {
         console.error('Unexpected error:', error);
       }
     }
+
     this._express.listen(this.port, () => console.log(`Server is running on port ${this.port}`));
   }
 }
